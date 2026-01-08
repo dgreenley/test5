@@ -1,14 +1,12 @@
 pull_request_rules:
-  - name: Add delay-mergify tag
+  - name: No longer ready-to-merge
     conditions:
-      - -label = delay-mergify
-      - or:
-          - created-at > 3 hours ago
-          - closed
+      - label = ready-to-merge
+      - closed
     actions:
       label:
-        add:
-          - delay-mergify
+        remove:
+          - ready-to-merge
   - name: Rebase everything on Mondays, plus dequeued and security (daily), failing tests 3x a week
     conditions:
       - -label = no-mergify
@@ -68,11 +66,11 @@ pull_request_rules:
       - created-at < 3 hours ago #match queue_rule
       - author = renovate[bot]
       - -closed
-      - label = delay-mergify
+      - -label = ready-to-merge
     actions:
       label:
-        remove:
-          - delay-mergify
+        add:
+          - ready-to-merge
 queue_rules:
   - name: Mergify
     queue_conditions:
@@ -88,7 +86,7 @@ queue_rules:
           - or:
               - and:
                   - created-at < 3 hours ago #match rebase rule
-                  - -label = delay-mergify
+                  - label = ready-to-merge
               - and:
                   - label = vulnerability
                   - created-at < 1 hour ago

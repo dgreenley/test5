@@ -1,0 +1,36 @@
+{
+	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
+	"extends": [
+		"config:best-practices",
+		":timezone(America/Chicago)",
+		":dependencyDashboard",
+		":semanticCommits",
+		":enableVulnerabilityAlertsWithAdditionalLabel(vulnerability)",
+		":separateMajorReleases",
+		":approveMajorUpdates",
+		":combinePatchMinorReleases",
+		":maintainLockFilesWeekly",
+		"mergeConfidence:all-badges"
+	],
+	"osvVulnerabilityAlerts": true,
+	"vulnerabilityAlerts": { "automerge": true },
+	"lockFileMaintenance": { "automerge": true },
+	"packageRules": [
+		{
+			"description": "Tailwindcss: Stay on v3 with an abandomentThreshold of 2 years to allow for this.",
+			"matchPackageNames": ["tailwindcss"],
+			"allowedVersions": "<4.0.0",
+			"abandonmentThreshold": "2 years"
+		},
+		{
+			"description": "Husky: Longer abandomentThreshold of 2 years as package is stable.",
+			"matchPackageNames": ["husky"],
+			"abandonmentThreshold": "2 years"
+		},
+		{
+			"description": "Optional minimum release age checks for lock file maintenance,  digest updates, and pinning",
+			"matchUpdateTypes": ["lockFileMaintenance", "digest", "pinDigest", "pin"],
+			"minimumReleaseAgeBehaviour": "timestamp-optional"
+		}
+	]
+}

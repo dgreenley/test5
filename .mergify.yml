@@ -1,0 +1,99 @@
+pull_request_rules:
+  - name: Add delay-mergify tag
+    conditions:
+      - -label = delay-mergify
+      - or:
+          - created-at > 3 hours ago
+          - closed
+    actions:
+      label:
+        add:
+          - delay-mergify
+  - name: Rebase everything on Mondays, plus: dequeued and security (daily), failing tests 3x a week
+    conditions:
+      - -label = no-mergify
+# twice daily while testing
+#      - schedule = 08:00-08:14[US/Central] # Inverse rerun schedule
+      - or:
+          - schedule = 08:00-08:14[US/Central]
+          - schedule = 16:00-16:14[US/Central]
+        # Mondays (all), or dequeued, or security, or (fail and 3xdays)
+      - or:
+          - schedule = Mon-Mon
+          - and: # Dequeued
+              - label = dequeued
+              - queue-dequeue-reason != none
+              - queue-dequeue-reason != pr-merged
+          - and: #security
+              - label = vulnerability
+              - title ~= (?i)\[SECURITY\] #ignore case
+          - and:
+              - or: #failing
+                  - "#check-failure > 0"
+                  - "#check-pending > 0"
+                  - "#check-stale > 0"
+              - or: #3x days
+# twice daily while testing
+                  - schedule = Mon-Sun
+#                  - schedule = Mon-Mon
+#                  - schedule = Wed-Wed
+#                  - schedule = Fri-Fri
+      - author = renovate[bot]
+      - -label = waiting-for-tests-to-complete
+      - -closed
+    actions:
+      label:
+        add:
+          - waiting-for-tests-to-complete
+          - rebase
+  - name: Have rerun tests
+    conditions:
+      - -label = no-mergify
+      - -label = rebase
+      - label = waiting-for-tests-to-complete
+      - updated-at < 5 minutes ago
+#      - schedule != 07:45-08:15[US/Central] # Inverse rebase schedule
+# twice daily while testing
+      - and:
+          - schedule != 08:00-08:15[US/Central]
+          - schedule != 16:00-16:15[US/Central]
+    actions:
+      label:
+        remove:
+          - waiting-for-tests-to-complete
+  - name: Mondays are for merges (daily while testing)
+    conditions:
+      - -label = no-mergify
+      - schedule = 08:00-08:14[US/Central] # Same as rebase schedule # Daily while testing
+      - created-at < 3 hours ago #match queue_rule
+      - author = renovate[bot]
+      - -closed
+      - label = delay-mergify
+    actions:
+      label:
+        remove:
+          - delay-mergify
+queue_rules:
+  - name: Mergify
+    queue_conditions:
+      - and:
+          - -label = no-mergify
+          - author = renovate[bot]
+          - -conflict
+          - -closed
+          - -label = waiting-for-tests-to-complete
+          - -label = rebase
+          - "#check-failure = 0"
+          - "#check-stale = 0"
+          - or:
+              - and:
+                  - created-at < 3 hours ago #match rebase rule
+                  - -label = delay-mergify
+              - and:
+                  - label = vulnerability
+                  - created-at < 1 hour ago
+                  - title ~= (?i)\[SECURITY\] #ignore case
+    checks_timeout: 10 m
+    autoqueue: true
+merge_queue:
+  max_parallel_checks: 1

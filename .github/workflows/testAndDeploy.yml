@@ -1,0 +1,32 @@
+name: Run Tests and Deploy
+
+on:
+  push:
+    branches-ignore:
+      - "dependabot/**" # avoid duplicates: only run the PR, not the push
+      - "renovate/**" # avoid duplicates: only run the PR, not the push
+  pull_request:
+    types: [opened, reopened, synchronize]
+  merge_group: {}
+
+permissions:
+  contents: read
+
+jobs:
+  run-tests-and-deploy:
+    name: Run Tests and Deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      # Setup
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        with:
+          persist-credentials: false
+      - name: Install pnpm
+        uses: pnpm/action-setup@1e1c8eafbd745f64b1ef30a7d7ed7965034c486c
+        with:
+          cache: true
+          run_install: |
+            args: [--prefer-frozen-lockfile]
+

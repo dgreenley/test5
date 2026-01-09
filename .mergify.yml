@@ -10,6 +10,7 @@ pull_request_rules:
   - name: Rebase everything on Mondays, plus dequeued and security (daily), failing tests 3x a week
     conditions:
       - -label = no-mergify
+      - -label = queued
 # twice daily while testing
 #      - schedule = 08:00-08:14[US/Central] # Inverse rerun schedule
       - or:

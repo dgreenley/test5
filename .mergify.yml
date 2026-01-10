@@ -18,7 +18,7 @@ pull_request_rules:
           - schedule = 16:00-16:14[US/Central]
         # Mondays (all), or dequeued, or security, or (fail and 3xdays)
       - or:
-          - schedule = Mon-Mon
+          - schedule = Mon-Sun #daily when testing
           - and: # Dequeued
               - label = dequeued
               - queue-dequeue-reason != none
